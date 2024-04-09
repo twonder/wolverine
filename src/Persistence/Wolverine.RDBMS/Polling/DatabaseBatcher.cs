@@ -38,7 +38,7 @@ public class DatabaseBatcher : IAsyncDisposable
 
         _logger = _runtime.LoggerFactory.CreateLogger<DatabaseBatcher>();
 
-        _executor = new Lazy<IExecutor>(() => runtime.As<IExecutorFactory>().BuildFor(typeof(DatabaseOperationBatch)));
+        _executor = new Lazy<IExecutor>(() => runtime.As<IExecutorFactory>().BuildFor(typeof(DatabaseOperationBatch), null));
     }
 
 

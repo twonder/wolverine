@@ -51,7 +51,7 @@ public sealed partial class WolverineRuntime : IWolverineRuntime, IHostedService
         var provider = container.GetInstance<ObjectPoolProvider>();
         ExecutionPool = provider.Create(this);
 
-        Pipeline = new HandlerPipeline(this, this);
+        Pipeline = new HandlerPipeline(this, this, null);
 
         _persistence = new Lazy<IMessageStore>(container.GetInstance<IMessageStore>);
 
@@ -162,13 +162,13 @@ public sealed partial class WolverineRuntime : IWolverineRuntime, IHostedService
             {
                 if (rule.TryFindHandledType(messageType, out var handledType))
                 {
-                    return this.As<IExecutorFactory>().BuildFor(handledType);
+                    return this.As<IExecutorFactory>().BuildFor(handledType, null);
                 }
             }
 
             if (Options.HandlerGraph.CanHandle(messageType))
             {
-                return this.As<IExecutorFactory>().BuildFor(messageType);
+                return this.As<IExecutorFactory>().BuildFor(messageType, null);
             }
 
             return (IMessageInvoker)RoutingFor(messageType).FindSingleRouteForSending();

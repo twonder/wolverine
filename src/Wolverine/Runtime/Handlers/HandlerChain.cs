@@ -72,7 +72,7 @@ public class HandlerChain : Chain<HandlerChain, ModifyHandlerChainAttribute>, IW
         foreach (var create in handler.Creates)
             i = DisambiguateOutgoingVariableName(create, i);
     }
-
+    
     /// <summary>
     ///     At what level should Wolverine log messages about messages succeeding? The default
     ///     is Information

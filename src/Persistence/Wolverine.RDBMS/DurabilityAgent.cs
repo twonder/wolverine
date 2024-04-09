@@ -3,6 +3,7 @@ using JasperFx.Core;
 using JasperFx.Core.Reflection;
 using Microsoft.Extensions.Logging;
 using Weasel.Core;
+using Wolverine.Configuration;
 using Wolverine.RDBMS.Durability;
 using Wolverine.RDBMS.Polling;
 using Wolverine.Runtime;
@@ -40,7 +41,7 @@ internal class DurabilityAgent : IAgent
 
         Uri = new Uri($"{AgentScheme}://{databaseName}");
 
-        var executor = runtime.As<IExecutorFactory>().BuildFor(typeof(IAgentCommand));
+        var executor = runtime.As<IExecutorFactory>().BuildFor(typeof(IAgentCommand), _localQueue as Endpoint);
 
         _logger = runtime.LoggerFactory.CreateLogger<DurabilityAgent>();
 

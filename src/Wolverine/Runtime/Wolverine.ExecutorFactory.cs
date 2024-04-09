@@ -1,10 +1,11 @@
-﻿using Wolverine.Runtime.Handlers;
+﻿using Wolverine.Configuration;
+using Wolverine.Runtime.Handlers;
 
 namespace Wolverine.Runtime;
 
 public partial class WolverineRuntime : IExecutorFactory
 {
-    IExecutor IExecutorFactory.BuildFor(Type messageType)
+    IExecutor IExecutorFactory.BuildFor(Type messageType, Endpoint endpoint)
     {
         var handler = Handlers.HandlerFor(messageType);
         var executor = handler == null

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using JasperFx.Core;
 using Microsoft.Extensions.ObjectPool;
+using Wolverine.Configuration;
 using Wolverine.ErrorHandling;
 using Wolverine.Logging;
 using Wolverine.Runtime.Handlers;
@@ -18,7 +19,7 @@ public class HandlerPipeline : IHandlerPipeline
 
     private readonly WolverineRuntime _runtime;
 
-    internal HandlerPipeline(WolverineRuntime runtime, IExecutorFactory executorFactory)
+    internal HandlerPipeline(WolverineRuntime runtime, IExecutorFactory executorFactory, Endpoint? endpoint)
     {
         _graph = runtime.Handlers;
         _runtime = runtime;
@@ -28,7 +29,7 @@ public class HandlerPipeline : IHandlerPipeline
 
         Logger = runtime.MessageTracking;
 
-        _executors = new LightweightCache<Type, IExecutor>(executorFactory.BuildFor);
+        _executors = new LightweightCache<Type, IExecutor>(messageType => executorFactory.BuildFor(messageType, endpoint));
     }
 
     internal IExecutorFactory ExecutorFactory { get; }

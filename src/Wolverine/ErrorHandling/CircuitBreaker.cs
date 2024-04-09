@@ -1,6 +1,7 @@
 using System.Threading.Tasks.Dataflow;
 using JasperFx.Core;
 using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
 using Wolverine.ErrorHandling.Matches;
 using Wolverine.Runtime;
 using Wolverine.Runtime.Handlers;
@@ -21,9 +22,9 @@ internal class CircuitBreakerTrackedExecutorFactory : IExecutorFactory
 
     public CircuitBreaker Breaker { get; }
 
-    public IExecutor BuildFor(Type messageType)
+    public IExecutor BuildFor(Type messageType, Endpoint endpoint)
     {
-        var executor = _innerFactory.BuildFor(messageType);
+        var executor = _innerFactory.BuildFor(messageType, endpoint);
         if (executor is Executor e)
         {
             return e.WrapWithMessageTracking(Breaker);
