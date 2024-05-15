@@ -48,21 +48,26 @@ public partial class NodeAgentController
 
         var nodes = await _persistence.LoadAllNodesAsync(_cancellation.Token);
 
-        // Check for stale nodes that are no longer writing health checks
-        var staleTime = DateTimeOffset.UtcNow.Subtract(_runtime.Options.Durability.StaleNodeTimeout);
-        var staleNodes = nodes.Where(x => x.LastHealthCheck < staleTime).ToArray();
-        nodes = nodes.Where(x => !staleNodes.Contains(x)).ToList();
+        var staleNodes = filterForStaleNodes(ref nodes);
 
+        await ejectStaleNodes(staleNodes);
 
         if (_tracker.Self.IsLeader())
         {
-            await ejectStaleNodes(staleNodes);
-
             // TODO -- do the verification here too!
             return await EvaluateAssignmentsAsync(nodes);
         }
 
         return await tryElectNewLeaderIfNecessary(staleNodes);
+    }
+
+    private WolverineNode[] filterForStaleNodes(ref IReadOnlyList<WolverineNode> nodes)
+    {
+        // Check for stale nodes that are no longer writing health checks
+        var staleTime = DateTimeOffset.UtcNow.Subtract(_runtime.Options.Durability.StaleNodeTimeout);
+        var staleNodes = nodes.Where(x => x.LastHealthCheck < staleTime).ToArray();
+        nodes = nodes.Where(x => !staleNodes.Contains(x)).ToList();
+        return staleNodes;
     }
 
     private async Task<AgentCommands> tryElectNewLeaderIfNecessary(IReadOnlyList<WolverineNode> staleNodes)
@@ -94,6 +99,8 @@ public partial class NodeAgentController
 
     private async Task ejectStaleNodes(IReadOnlyList<WolverineNode> staleNodes)
     {
+        if (!staleNodes.Any()) return;
+        
         foreach (var staleNode in staleNodes)
         {
             await _persistence.DeleteAsync(staleNode.Id);

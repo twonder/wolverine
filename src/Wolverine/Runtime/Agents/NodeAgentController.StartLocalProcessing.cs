@@ -6,7 +6,18 @@ public partial class NodeAgentController
 {
     public async Task<AgentCommands> StartLocalAgentProcessingAsync(WolverineOptions options)
     {
+
+        
         var others = await _persistence.LoadAllNodesAsync(_cancellation.Token);
+        var staleNodes = filterForStaleNodes(ref others);
+        try
+        {
+            await ejectStaleNodes(staleNodes);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while trying to eject any stale nodes on startup");
+        }
 
         var current = WolverineNode.For(options);
         foreach (var controller in _agentFamilies.Values.OfType<IStaticAgentFamily>())
